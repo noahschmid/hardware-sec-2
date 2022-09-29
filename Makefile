@@ -25,3 +25,8 @@ clean:
 submission: clean
 	tar czvf /tmp/$(STUDENT_ID).tar.gz --exclude='.*' --exclude=$(STUDENT_ID).tar.gz -C "$(shell dirname $(CWD))" "$(shell basename $(CWD))"
 	mv /tmp/$(STUDENT_ID).tar.gz .
+
+run:
+	cp dram-functions /data/${USER}/main
+	# run program on cluster node
+	srun -t $(TIMELIMIT) -w ${NODE} --pty /data/${USER}/main -b
