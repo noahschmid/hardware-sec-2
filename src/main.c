@@ -260,9 +260,11 @@ void task1(char *buffer) {
   int significant_bits = 0;
   int num_conflicts;
   char **conflicts = get_conflicts(buffer, threshold, &num_conflicts);
+  
   for(int i = 0; i < num_conflicts; ++i) {
     for(int bit = 0; bit < 30; ++bit) {
       char *new_addr = change_bit(conflicts[i], bit);
+      //printf("%d %p %p\n",bit, conflicts[i], new_addr);
       int time = time_access(conflicts[i], new_addr);
       if(time < threshold) {
         significant_bits |= (1 << bit);
