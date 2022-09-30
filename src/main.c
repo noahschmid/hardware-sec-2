@@ -256,7 +256,7 @@ char *change_bit(char *addr, int bit) {
 void task1(char *buffer) {
   char **pool = gen_addrs(POOL_LEN, buffer);
   char *base = pool[rand()%POOL_LEN];
-  int threshold = 450;
+  int threshold = 510;
   long long int significant_bits = 0;
   int num_conflicts;
   char **conflicts = get_conflicts(buffer, threshold, &num_conflicts);
