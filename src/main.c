@@ -271,7 +271,7 @@ void task1(char *buffer) {
       }
     }
   }
-  printf("%llx\n", significant_bits);
+  printf("%ll08x\n", significant_bits);
 }
 
 void task2(char *buffer) {
