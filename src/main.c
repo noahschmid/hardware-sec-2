@@ -280,16 +280,13 @@ void task1(char *buffer) {
 int calc_fn(char *addr, uint64_t fn) {
   uint64_t mask = (uint64_t)addr & fn;
   int result = 0;
-  printf("addr: %p fn: %llx mask: %llx ", addr, fn, mask);
   for(int i = 0; i < 32; ++i) {
     if(mask & 1)
       result++;
     mask = mask >> 1;
   }
 
-  result = result == 2 ? 0 : result; 
-  printf("result: %d\n", result);
-  return result;
+  return result == 2 ? 0 : result; 
 }
 
 uint64_t *get_fns() {
@@ -332,7 +329,7 @@ void task2(char *buffer) {
     }
   }
 
-  printf("num_funcs: %d\n", num_funcs);
+  printf("%d\n", num_funcs);
 
   for(int i = 0; i < num_funcs; ++i) {
     printf("%llx\n", funcs[i]);
