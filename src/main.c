@@ -329,10 +329,10 @@ void task2(char *buffer) {
     }
   }
 
-  printf("%d\n", num_funcs);
+  printf("num_funcs: %d\n", num_funcs);
 
   for(int i = 0; i < num_funcs; ++i) {
-    printf("%llx\n", fns[i]);
+    printf("%llx\n", funcs[i]);
   }
 }
 
