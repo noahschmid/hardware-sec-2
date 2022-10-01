@@ -307,7 +307,7 @@ uint64_t *get_fns() {
 }
 
 void task2(char *buffer) {
-  char *fns = get_fns();
+  uint64_t *fns = get_fns();
   char **pool = gen_addrs(POOL_LEN, buffer);
   char *base = pool[rand()%POOL_LEN];
   long long int significant_bits = 0;
