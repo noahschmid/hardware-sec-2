@@ -30,3 +30,13 @@ run:
 	cp dram-functions /data/${USER}/main
 	# run program on cluster node
 	srun -t $(TIMELIMIT) -w ${NODE} --pty /data/${USER}/main -b
+
+run2:
+	cp dram-functions /data/${USER}/main
+	# run program on cluster node
+	srun -t $(TIMELIMIT) -w ${NODE} --pty /data/${USER}/main -f
+
+run3:
+	cp dram-functions /data/${USER}/main
+	# run program on cluster node
+	srun -t $(TIMELIMIT) -w ${NODE} --pty /data/${USER}/main -m
