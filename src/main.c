@@ -13,6 +13,8 @@
 #define ROUNDS 100
 #define POOL_LEN 5000
 #define DELETED_ADDR (char*)0xffffffff
+#define THRESHOLD 547
+#define MAX_FUNCS 496
 
 typedef struct cluster {
     int size;
@@ -246,6 +248,8 @@ char** get_conflicts(char *buffer, int threshold, int *num_conflicts) {
     }
   }
 
+  conflicts[*num_conflicts] = base;
+
   return conflicts;
 }
 
@@ -256,17 +260,16 @@ char *change_bit(char *addr, int bit) {
 void task1(char *buffer) {
   char **pool = gen_addrs(POOL_LEN, buffer);
   char *base = pool[rand()%POOL_LEN];
-  int threshold = 510;
   long long int significant_bits = 0;
   int num_conflicts;
-  char **conflicts = get_conflicts(buffer, threshold, &num_conflicts);
+  char **conflicts = get_conflicts(buffer, THRESHOLD, &num_conflicts);
   
   for(int i = 0; i < num_conflicts; ++i) {
     for(int bit = 0; bit < 30; ++bit) {
       char *new_addr = change_bit(conflicts[i], bit);
       //printf("%d %p %p\n",bit, conflicts[i], new_addr);
       int time = time_access(conflicts[i], new_addr);
-      if(time < threshold) {
+      if(time < THRESHOLD) {
         significant_bits |= (1 << bit);
       }
     }
@@ -274,7 +277,63 @@ void task1(char *buffer) {
   printf("%08x\n", significant_bits);
 }
 
+int calc_fn(char *addr, uint64_t fn) {
+  uint64_t mask = (uint64_t)addr & fn;
+  int result = 0;
+  for(int i = 0; i < 32; ++i) {
+    if(mask & 1)
+      result++;
+    mask = mask >> 1;
+  }
+
+  return result == 2 ? 0 : result; 
+}
+
+uint64_t *get_fns() {
+  const int num_fn = MAX_FUNCS;
+  uint64_t *fns = malloc(num_fn*sizeof(uint64_t));
+  fns[0] = 3;
+  for(int i = 1; i < num_fn; ++i) {
+    uint64_t previous = fns[i-1];
+    uint64_t c = previous & -previous;
+    uint64_t r = previous + c;
+    fns[i] = (((r^previous) >> 2) / c) | r;
+  }
+
+  return fns;
+}
+
 void task2(char *buffer) {
+  char *fns = get_fns();
+  char **pool = gen_addrs(POOL_LEN, buffer);
+  char *base = pool[rand()%POOL_LEN];
+  long long int significant_bits = 0;
+  int num_conflicts;
+  char **conflicts = get_conflicts(buffer, THRESHOLD, &num_conflicts);
+
+  int num_funcs = 0;
+  uint64_t funcs[MAX_FUNCS];
+
+  for(int i = 0; i < MAX_FUNCS; ++i) {
+    int result = calc_fn(conflicts[0], fns[i]);
+    int same = 1;
+    for(int j = 1; j < num_conflicts; ++j) {
+      if(result != calc_fn(conflicts[j], fns[i])) {
+        same = 0;
+        break;
+      }
+    }
+    if(same) {
+      funcs[num_funcs] = fns[i];
+      num_funcs++;
+    }
+  }
+
+  printf("%d\n", num_funcs);
+
+  for(int i = 0; i < num_funcs; ++i) {
+    printf("%llx\n", fns[i]);
+  }
 }
 
 void task3(char *buffer) {
