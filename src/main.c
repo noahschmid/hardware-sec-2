@@ -272,7 +272,7 @@ void task1(char *buffer) {
 int calc_fn(uint64_t addr, uint64_t fn) {
   uint64_t mask = (uint64_t)addr & fn;
   int result = 0;
-  for(int i = 0; i < 32; ++i) {
+  for(int i = 0; i < 64; ++i) {
     if(mask & 1)
       result++;
     mask = mask >> 1;
@@ -322,12 +322,9 @@ void task2(char *buffer) {
 
   /* now test the candidates against one address out of each set*/
   for(int i = 0; i < candidates.size(); ++i) {
-    printf("--\n");
     int result = calc_fn(conflicts[0][0], candidates[i]);
     int same = 1;
-    printf("%p %d\n", conflicts[0][0], result);
     for(int j = 1; j < conflicts.size(); ++j) {
-      printf("%p %d\n", conflicts[j][0], calc_fn(conflicts[j][0], candidates[i]));
       if(result != calc_fn(conflicts[j][0], candidates[i])) {
         same = 0;
         break;
