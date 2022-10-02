@@ -314,7 +314,7 @@ void task2(char *buffer) {
           break;
         }
       }
-      if(!same) {
+      if(same) {
         ++it;
       }
     }
