@@ -164,7 +164,6 @@ int time_access(volatile char *base, volatile char *addr) {
   int times[ROUNDS];
 
   while(round--) {
-
     asm volatile (
     "MFENCE\n\t"
     "CPUID\n\t"
@@ -218,6 +217,7 @@ int round_to_pow2(int num) {
 std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
   std::vector<uint64_t> pool = gen_addrs(POOL_LEN, buffer);
   std::vector<std::vector<uint64_t>> conflicts;
+  int num_conflicts = 0;
 
   while(pool.size() > 0) {
     int base_id = rand()%pool.size();
@@ -236,10 +236,11 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
     }
 
     conflicts.push_back(set);
+    num_conflicts++;
   }
 
 
-  printf("num sets: %d\n", conflicts.size());
+  printf("num sets: %d\n", num_conflicts);
 
   return conflicts;
 }
