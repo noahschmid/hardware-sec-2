@@ -318,21 +318,21 @@ void task2(char *buffer) {
   char *base = pool[rand()%POOL_LEN];
   long long int significant_bits = 0;
   std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, THRESHOLD);
-  std::vector<uint64_t> candidates = get_funcs();  
-
+  std::vector<uint64_t> funcs = get_funcs();  
+  std::vector<uint64_t> candidates;
   /* first get set of function candidates*/
   std::vector<uint64_t> set = conflicts[0];
-  for(int i = 0; i < candidates.size(); ++i) {
-    int result = calc_fn(set[0], candidates[i]);
+  for(int i = 0; i < funcs.size(); ++i) {
+    int result = calc_fn(set[0], funcs[i]);
     int same = 1;
     for(int j = 1; j < set.size(); ++j) {
-      if(result != calc_fn(set[j], candidates[i])) {
+      if(result != calc_fn(set[j], funcs[i])) {
         same = 0;
         break;
       }
     }
-    if(!same) {
-      candidates.erase(candidates.begin() + i);
+    if(same) {
+      candidates.push_back(funcs[i]);
     }
   }
 
