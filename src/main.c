@@ -300,49 +300,32 @@ std::vector<uint64_t> get_funcs() {
 void task2(char *buffer) {
   long long int significant_bits = 0;
   std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, THRESHOLD);
-  std::vector<uint64_t> funcs = get_funcs();  
-  std::vector<uint64_t> candidates;
-  /* first get set of function candidates*/
-  for(int i = 0; i < funcs.size(); ++i) {
-    int result = calc_fn(conflicts[0][0], funcs[i]);
-    int same = 1;
-    for(int j = 1; j < conflicts[0].size(); ++j) {
-      if(result != calc_fn(conflicts[0][j], funcs[i])) {
-        same = 0;
-        break;
+  std::vector<uint64_t> candidates = get_funcs();
+  auto it = candidates.begin();
+
+  for(int i = 0; i < conflicts.size(); ++i) {
+    while(it != candidates.end()) {
+      int result = calc_fn(conflicts[i][0], candidates[i]);
+      int same = 1;
+      for(int j = 1; j < conflicts[i].size(); ++j) {
+        if(result != calc_fn(conflicts[i][j], candidates[i])) {
+          same = 0;
+          it = candidates.erase(it);
+          break;
+        }
       }
-    }
-    if(same) {
-      candidates.push_back(funcs[i]);
+      if(!same) {
+        ++it;
+      }
     }
   }
 
   printf("candidates: %d\n", candidates.size());
 
-  std::vector<uint64_t> functions;
+  printf("%d\n", candidates.size());
 
-  /* now test the candidates against one address out of each set*/
   for(int i = 0; i < candidates.size(); ++i) {
     printf("%llx\n", candidates[i]);
-    int result = calc_fn(conflicts[0][1], candidates[i]);
-    printf("%llx %llx %llx\n", conflicts[0][1], candidates[i], result);
-    int same = 1;
-    for(int j = 1; j < conflicts.size(); ++j) {
-      if(result != calc_fn(conflicts[j][1], candidates[i])) {
-        same = 0;
-        break;
-      }
-    }
-
-    if(!same) { /* not the same for different banks -> add to final addressing function set*/
-      functions.push_back(candidates[i]);
-    }
-  }
-
-  printf("%d\n", functions.size());
-
-  for(int i = 0; i < functions.size(); ++i) {
-    printf("%llx\n", functions[i]);
   }
 }
 
