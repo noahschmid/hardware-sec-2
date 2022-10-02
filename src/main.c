@@ -226,12 +226,14 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
 
     std::vector<uint64_t> set;
     set.push_back((uint64_t)base);
+
+    auto it = pool.begin();
     
-    for (int i = 0; i < pool.size(); ++i) {
-      int time = time_access((char*)base, (char*)pool[i]);
+    while(it != pool.end()) {
+      int time = time_access((char*)base, (char*)*it);
       if(time > threshold) { /*conflict*/
-        set.push_back((uint64_t)pool[i]);
-        pool.erase(pool.begin() + i);
+        set.push_back((uint64_t)*it);
+        it = pool.erase(it);
       }
     }
 
@@ -240,7 +242,7 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
   }
 
 
-  printf("num sets: %d\n", num_conflicts);
+  printf("num sets: %d\n", conflicts.size());
 
   return conflicts;
 }
