@@ -204,22 +204,6 @@ void print_help() {
   printf("\t./dram-functions -m\t-> prints the row mask in hexadecimal\n");
 }
 
-void remove_addr(char **pool, int i) {
-  pool[i] = DELETED_ADDR;
-}
-
-void normalize(char **pool, int *pool_len) {
-    int original_length = *pool_len;
-    for(int i = 0; i < *pool_len; ++i) {
-        if(pool[i] == DELETED_ADDR) {
-            for(int j = i; j < original_length; j++) 
-                pool[j] = pool[j+1];
-            --i;
-            (*pool_len)--;
-        }
-    }
-}
-
 int round_to_pow2(int num) {
   int exp = (int)log2(num);
   int max = pow(2, exp+1);
@@ -253,6 +237,9 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
 
     conflicts.push_back(set);
   }
+
+
+  printf("num sets: %d\n", conflicts.size());
 
   return conflicts;
 }
@@ -315,12 +302,11 @@ void task2(char *buffer) {
   std::vector<uint64_t> funcs = get_funcs();  
   std::vector<uint64_t> candidates;
   /* first get set of function candidates*/
-  std::vector<uint64_t> set = conflicts[0];
   for(int i = 0; i < funcs.size(); ++i) {
-    int result = calc_fn(set[0], funcs[i]);
+    int result = calc_fn(conflicts[0][0], funcs[i]);
     int same = 1;
-    for(int j = 1; j < set.size(); ++j) {
-      if(result != calc_fn(set[j], funcs[i])) {
+    for(int j = 1; j < conflicts[0].size(); ++j) {
+      if(result != calc_fn(conflicts[0][j], funcs[i])) {
         same = 0;
         break;
       }
