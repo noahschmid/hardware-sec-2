@@ -15,7 +15,7 @@
 #define ROUNDS 100
 #define POOL_LEN 5000
 #define DELETED_ADDR (char*)0xffffffff
-#define THRESHOLD 547
+#define THRESHOLD 510
 #define MAX_FUNCS 496
 
 typedef struct cluster {
@@ -336,15 +336,18 @@ void task2(char *buffer) {
     }
   }
 
-  printf("candidates: %d\n", candidates.size())
+  printf("candidates: %d\n", candidates.size());
 
   std::vector<uint64_t> functions;
 
   /* now test the candidates against one address out of each set*/
   for(int i = 0; i < candidates.size(); ++i) {
+    printf("--\n");
     int result = calc_fn(conflicts[0][0], candidates[i]);
     int same = 1;
+    printf("%d\n", result);
     for(int j = 1; j < conflicts.size(); ++j) {
+      printf("%d\n", calc_fn(conflicts[j][0], candidates[i]));
       if(result != calc_fn(conflicts[j][0], candidates[i])) {
         same = 0;
         break;
