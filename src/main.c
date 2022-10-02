@@ -140,14 +140,11 @@ int get_threshold(int values[], const int num_values) {
     }
 }
 
-char **gen_addrs(const int len, char *buffer) {
-  char **addrs = (char**)malloc(len*sizeof(char*));
-  if(!addrs) {
-    printf("Error allocating memory\n");
-    exit(-1);
-  }
+std::vector<uint64_t> gen_addrs(const int len, char *buffer) {
+  std::vector<uint64_t> addrs;
+
   for(int i = 0; i < len; ++i) {
-    addrs[i] = buffer + (int)(rand()%(SUPERPAGE/8))*8;
+    addrs.push_back((uint64_t)buffer + (int)(rand()%(SUPERPAGE/8))*8);
   }
   return addrs;
 }
@@ -235,26 +232,25 @@ int round_to_pow2(int num) {
 }
 
 std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
-  char **pool = gen_addrs(POOL_LEN, buffer);
+  std::vector<uint64_t> pool = gen_addrs(POOL_LEN, buffer);
   std::vector<std::vector<uint64_t>> conflicts;
 
-  //char **conflicts = calloc(POOL_LEN, sizeof(char*));
-  int pool_len = POOL_LEN;
+  while(pool.size() > 0) {
+    int base_id = rand()%pool.size();
+    uint64_t base = pool[base_id];
+    pool.erase(pool.begin() + base_id);
 
-  while(pool_len > 0) {
-    char *base = pool[rand()%pool_len];
     std::vector<uint64_t> set;
     set.push_back((uint64_t)base);
     
-    for (int i = 0; i < pool_len; ++i) {
-      int time = time_access(base, pool[i]);
+    for (int i = 0; i < pool.size(); ++i) {
+      int time = time_access((char*)base, (char*)pool[i]);
       if(time > threshold) { /*conflict*/
         set.push_back((uint64_t)pool[i]);
-        remove_addr(pool, i);
+        pool.erase(pool.begin() + i);
       }
     }
 
-    normalize(pool, &pool_len);
     conflicts.push_back(set);
   }
 
@@ -266,8 +262,8 @@ uint64_t change_bit(uint64_t addr, int bit) {
 }
 
 void task1(char *buffer) {
-  char **pool = gen_addrs(POOL_LEN, buffer);
-  char *base = pool[rand()%POOL_LEN];
+  std::vector<uint64_t> pool = gen_addrs(POOL_LEN, buffer);
+  uint64_t base = pool[rand()%POOL_LEN];
   uint64_t significant_bits = 0;
   std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, THRESHOLD);
 
@@ -314,8 +310,6 @@ std::vector<uint64_t> get_funcs() {
 }
 
 void task2(char *buffer) {
-  char **pool = gen_addrs(POOL_LEN, buffer);
-  char *base = pool[rand()%POOL_LEN];
   long long int significant_bits = 0;
   std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, THRESHOLD);
   std::vector<uint64_t> funcs = get_funcs();  
