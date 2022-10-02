@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <math.h>
+#include <vector>
+#include <iostream>
 
 #define CLUSTER_ONE 0
 #define CLUSTER_TWO 1
@@ -139,7 +141,7 @@ int get_threshold(int values[], const int num_values) {
 }
 
 char **gen_addrs(const int len, char *buffer) {
-  char **addrs = malloc(len*sizeof(char*));
+  char **addrs = (char**)malloc(len*sizeof(char*));
   if(!addrs) {
     printf("Error allocating memory\n");
     exit(-1);
@@ -150,7 +152,7 @@ char **gen_addrs(const int len, char *buffer) {
   return addrs;
 }
 
-int cmp(void *x, void* y) {
+int cmp(const void *x, const void* y) {
   return (int*)x - (int*)y;
 }
 
@@ -232,52 +234,59 @@ int round_to_pow2(int num) {
   return dist1 > dist2 ? min : max;
 }
 
-char** get_conflicts(char *buffer, int threshold, int *num_conflicts) {
+std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
   char **pool = gen_addrs(POOL_LEN, buffer);
-  char **conflicts = calloc(POOL_LEN, sizeof(char*));
+  std::vector<std::vector<uint64_t>> conflicts;
+
+  //char **conflicts = calloc(POOL_LEN, sizeof(char*));
   int pool_len = POOL_LEN;
-  *num_conflicts = 0;
 
-  char *base = pool[rand()%pool_len];
-  
-  for (int i = 0; i < pool_len; ++i) {
-    int time = time_access(base, pool[i]);
-    if(time > threshold) { /*conflict*/
-      conflicts[*num_conflicts] = pool[i];
-      (*num_conflicts)++;
+  while(pool_len > 0) {
+    char *base = pool[rand()%pool_len];
+    std::vector<uint64_t> set;
+    set.push_back((uint64_t)base);
+    
+    for (int i = 0; i < pool_len; ++i) {
+      int time = time_access(base, pool[i]);
+      if(time > threshold) { /*conflict*/
+        set.push_back((uint64_t)pool[i]);
+        remove_addr(pool, i);
+      }
     }
-  }
 
-  conflicts[*num_conflicts] = base;
+    normalize(pool, &pool_len);
+    conflicts.push_back(set);
+  }
 
   return conflicts;
 }
 
-char *change_bit(char *addr, int bit) {
-  return (char*)((long long int)addr ^ (1 << bit));
+uint64_t change_bit(uint64_t addr, int bit) {
+  return (uint64_t)((uint64_t)addr ^ (1 << bit));
 }
 
 void task1(char *buffer) {
   char **pool = gen_addrs(POOL_LEN, buffer);
   char *base = pool[rand()%POOL_LEN];
-  long long int significant_bits = 0;
-  int num_conflicts;
-  char **conflicts = get_conflicts(buffer, THRESHOLD, &num_conflicts);
+  uint64_t significant_bits = 0;
+  std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, THRESHOLD);
+
+  std::vector<uint64_t> set = conflicts[0];
   
-  for(int i = 0; i < num_conflicts; ++i) {
+  for(int i = 0; i < set.size(); ++i) {
     for(int bit = 0; bit < 30; ++bit) {
-      char *new_addr = change_bit(conflicts[i], bit);
+      uint64_t new_addr = change_bit(set[i], bit);
       //printf("%d %p %p\n",bit, conflicts[i], new_addr);
-      int time = time_access(conflicts[i], new_addr);
+      int time = time_access((char *)set[i], (char *)new_addr);
       if(time < THRESHOLD) {
         significant_bits |= (1 << bit);
       }
     }
   }
-  printf("%08x\n", significant_bits);
+  printf("%llx\n", significant_bits);
 }
 
-int calc_fn(char *addr, uint64_t fn) {
+int calc_fn(uint64_t addr, uint64_t fn) {
   uint64_t mask = (uint64_t)addr & fn;
   int result = 0;
   for(int i = 0; i < 32; ++i) {
@@ -289,50 +298,66 @@ int calc_fn(char *addr, uint64_t fn) {
   return result == 2 ? 0 : result; 
 }
 
-uint64_t *get_fns() {
+/*source: https://math.stackexchange.com/questions/2254151/is-there-a-general-formula-to-generate-all-numbers-with-a-given-binary-hamming */
+std::vector<uint64_t> get_funcs() {
   const int num_fn = MAX_FUNCS;
-  uint64_t *fns = malloc(num_fn*sizeof(uint64_t));
-  fns[0] = 3;
+  std::vector<uint64_t> fns;
+  fns.push_back(3);
   for(int i = 1; i < num_fn; ++i) {
     uint64_t previous = fns[i-1];
     uint64_t c = previous & -previous;
     uint64_t r = previous + c;
-    fns[i] = (((r^previous) >> 2) / c) | r;
+    fns.push_back((((r^previous) >> 2) / c) | r);
   }
 
   return fns;
 }
 
 void task2(char *buffer) {
-  uint64_t *fns = get_fns();
   char **pool = gen_addrs(POOL_LEN, buffer);
   char *base = pool[rand()%POOL_LEN];
   long long int significant_bits = 0;
-  int num_conflicts;
-  char **conflicts = get_conflicts(buffer, THRESHOLD, &num_conflicts);
+  std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, THRESHOLD);
+  std::vector<uint64_t> candidates = get_funcs();  
 
-  int num_funcs = 0;
-  uint64_t funcs[MAX_FUNCS];
-
-  for(int i = 0; i < MAX_FUNCS; ++i) {
-    int result = calc_fn(conflicts[0], fns[i]);
+  /* first get set of function candidates*/
+  std::vector<uint64_t> set = conflicts[0];
+  for(int i = 0; i < candidates.size(); ++i) {
+    int result = calc_fn(set[0], candidates[i]);
     int same = 1;
-    for(int j = 1; j < num_conflicts; ++j) {
-      if(result != calc_fn(conflicts[j], fns[i])) {
+    for(int j = 1; j < set.size(); ++j) {
+      if(result != calc_fn(set[j], candidates[i])) {
         same = 0;
         break;
       }
     }
-    if(same) {
-      funcs[num_funcs] = fns[i];
-      num_funcs++;
+    if(!same) {
+      candidates.erase(candidates.begin() + i);
     }
   }
 
-  printf("%d\n", num_funcs);
+  std::vector<uint64_t> functions;
 
-  for(int i = 0; i < num_funcs; ++i) {
-    printf("%llx\n", funcs[i]);
+  /* now test the candidates against one address out of each set*/
+  for(int i = 0; i < candidates.size(); ++i) {
+    int result = calc_fn(conflicts[0][0], candidates[i]);
+    int same = 1;
+    for(int j = 1; j < conflicts.size(); ++j) {
+      if(result != calc_fn(conflicts[j][0], candidates[i])) {
+        same = 0;
+        break;
+      }
+    }
+
+    if(!same) { /* not the same for different banks -> add to final addressing function set*/
+      functions.push_back(candidates[i]);
+    }
+  }
+
+  printf("%d\n", functions.size());
+
+  for(int i = 0; i < functions.size(); ++i) {
+    printf("%llx\n", functions[i]);
   }
 }
 
@@ -358,11 +383,11 @@ void task3(char *buffer) {
 }
 
 int main(int argc, char **argv) {
-  char *buffer = mmap(NULL, SUPERPAGE, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
+  char *buffer = (char*)mmap(NULL, SUPERPAGE, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
 
   if(buffer == MAP_FAILED) {
     printf("Error %d\n", errno);
-    buffer = mmap(NULL, SUPERPAGE, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    buffer = (char*)mmap(NULL, SUPERPAGE, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
     if(buffer == MAP_FAILED) {
       printf("Error: %d\n", errno);

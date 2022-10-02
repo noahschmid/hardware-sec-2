@@ -8,6 +8,7 @@ USER		:= noschmid
 TIMELIMIT	:= 2:00
 LDLIBS		:= -lm
 NODE		:= ee-tik-cn001
+CC			:= g++
 
 all: $(BINARY)
 
