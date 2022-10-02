@@ -325,6 +325,7 @@ void task2(char *buffer) {
   for(int i = 0; i < candidates.size(); ++i) {
     printf("%llx\n", candidates[i]);
     int result = calc_fn(conflicts[0][1], candidates[i]);
+    printf("%llx %llx %llx\n", conflicts[0][1], candidates[i], result);
     int same = 1;
     for(int j = 1; j < conflicts.size(); ++j) {
       if(result != calc_fn(conflicts[j][1], candidates[i])) {
