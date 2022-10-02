@@ -234,6 +234,8 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
       if(time > threshold) { /*conflict*/
         set.push_back((uint64_t)*it);
         it = pool.erase(it);
+      } else {
+        ++it;
       }
     }
 
