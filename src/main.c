@@ -305,10 +305,10 @@ void task2(char *buffer) {
 
   for(int i = 0; i < conflicts.size(); ++i) {
     while(it != candidates.end()) {
-      int result = calc_fn(conflicts[i][0], candidates[i]);
+      int result = calc_fn(conflicts[i][0], *it);
       int same = 1;
       for(int j = 1; j < conflicts[i].size(); ++j) {
-        if(result != calc_fn(conflicts[i][j], candidates[i])) {
+        if(result != calc_fn(conflicts[i][j], *it)) {
           same = 0;
           it = candidates.erase(it);
           break;
