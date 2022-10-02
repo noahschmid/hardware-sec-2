@@ -336,6 +336,8 @@ void task2(char *buffer) {
     }
   }
 
+  printf("candidates: %d\n", candidates.size())
+
   std::vector<uint64_t> functions;
 
   /* now test the candidates against one address out of each set*/
