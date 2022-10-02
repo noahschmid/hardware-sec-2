@@ -240,11 +240,7 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
     }
 
     conflicts.push_back(set);
-    num_conflicts++;
   }
-
-
-  printf("num sets: %d\n", conflicts.size());
 
   return conflicts;
 }
@@ -327,10 +323,11 @@ void task2(char *buffer) {
 
   /* now test the candidates against one address out of each set*/
   for(int i = 0; i < candidates.size(); ++i) {
-    int result = calc_fn(conflicts[0][0], candidates[i]);
+    printf("%llx\n", candidates[i]);
+    int result = calc_fn(conflicts[0][1], candidates[i]);
     int same = 1;
     for(int j = 1; j < conflicts.size(); ++j) {
-      if(result != calc_fn(conflicts[j][0], candidates[i])) {
+      if(result != calc_fn(conflicts[j][1], candidates[i])) {
         same = 0;
         break;
       }
