@@ -15,7 +15,8 @@
 #define ROUNDS 100
 #define POOL_LEN 10000
 #define DELETED_ADDR (char*)0xffffffff
-#define THRESHOLD 520
+#define THRESHOLD 500
+#define MAX_BANK_CONFLICT_ACCESS_TIME 580
 #define MAX_FUNCS 496
 
 typedef struct cluster {
@@ -232,7 +233,7 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
     while(it != pool.end()) {
       int time = time_access((char*)base, (char*)*it);
       if(time > threshold) { /*conflict*/
-        if(time < 550)
+        if(time < MAX_BANK_CONFLICT_ACCESS_TIME)
           set.push_back((uint64_t)*it);
         it = pool.erase(it);
       } else {
