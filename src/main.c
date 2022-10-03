@@ -16,7 +16,7 @@
 #define POOL_LEN 10000
 #define DELETED_ADDR (char*)0xffffffff
 #define THRESHOLD 480
-#define MAX_BANK_CONFLICT_ACCESS_TIME 700
+#define MAX_BANK_CONFLICT_ACCESS_TIME 800
 #define MAX_FUNCS 496
 
 typedef struct cluster {
