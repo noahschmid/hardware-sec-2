@@ -12,10 +12,10 @@
 #define CLUSTER_TWO 1
 #define MAX_CYCLES 600
 #define SUPERPAGE (1024*1024*1024)
-#define ROUNDS 1000
+#define ROUNDS 250
 #define POOL_LEN 10000
 #define DELETED_ADDR (char*)0xffffffff
-#define THRESHOLD 450
+#define THRESHOLD 480
 #define MAX_BANK_CONFLICT_ACCESS_TIME 700
 #define MAX_FUNCS 496
 
@@ -243,6 +243,14 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
 
     conflicts.push_back(set);
   }
+
+  int rounded = round_to_pow2(conflicts.size());
+  if(rounded < conflicts.size()) {
+    for(int i = 0; i < conflicts.size()-rounded; ++i) {
+      conflicts.pop_back();
+    }
+  }
+
   printf("num banks: %d\n", conflicts.size());
   return conflicts;
 }
