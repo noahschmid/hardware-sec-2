@@ -13,9 +13,9 @@
 #define MAX_CYCLES 600
 #define SUPERPAGE (1024*1024*1024)
 #define ROUNDS 100
-#define POOL_LEN 5000
+#define POOL_LEN 8000
 #define DELETED_ADDR (char*)0xffffffff
-#define THRESHOLD 510
+#define THRESHOLD 520
 #define MAX_FUNCS 496
 
 typedef struct cluster {
@@ -318,6 +318,22 @@ void task2(char *buffer) {
     }
     if(same) {
       ++it;
+    }
+  }
+
+  it = candidates.begin();
+  while(it != candidates.end()) {
+    int result = calc_fn(conflicts[0][0], *it);
+    bool same = true;
+    for(int j = 1; j < conflicts.size(); ++j) {
+      if(result != calc_fn(conflicts[j][0], *it)) {
+        same = false;
+        ++it;
+        break;
+      }
+    }
+    if(same) {
+      it = candidates.erase(it);
     }
   }
 
