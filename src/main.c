@@ -13,7 +13,7 @@
 #define MAX_CYCLES 600
 #define SUPERPAGE (1024*1024*1024)
 #define ROUNDS 100
-#define POOL_LEN 8000
+#define POOL_LEN 10000
 #define DELETED_ADDR (char*)0xffffffff
 #define THRESHOLD 520
 #define MAX_FUNCS 496
@@ -232,7 +232,7 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
     while(it != pool.end()) {
       int time = time_access((char*)base, (char*)*it);
       if(time > threshold) { /*conflict*/
-        if(time < 600)
+        if(time < 550)
           set.push_back((uint64_t)*it);
         it = pool.erase(it);
       } else {
