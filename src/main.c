@@ -243,13 +243,13 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
 
     conflicts.push_back(set);
   }
-
+/*
   int rounded = round_to_pow2(conflicts.size());
   if(rounded < conflicts.size()) {
     for(int i = 0; i < conflicts.size()-rounded; ++i) {
       conflicts.pop_back();
     }
-  }
+  }*/
 
   printf("num banks: %d\n", conflicts.size());
   return conflicts;
@@ -355,6 +355,8 @@ void task2(char *buffer) {
       ok = true;
     if(num_banks == 32 && candidates.size() == 5)
       ok = true;
+
+    printf("num candidates: %d\n", candidates.size());
   }
 
   printf("%d\n", candidates.size());
