@@ -243,7 +243,7 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
 
     conflicts.push_back(set);
   }
-
+  printf("num banks: %d\n", conflicts.size());
   return conflicts;
 }
 
