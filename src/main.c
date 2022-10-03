@@ -13,7 +13,7 @@
 #define MAX_CYCLES 600
 #define SUPERPAGE (1024*1024*1024)
 #define ROUNDS 100
-#define POOL_LEN 10000
+#define POOL_LEN 20000
 #define DELETED_ADDR (char*)0xffffffff
 #define THRESHOLD 500
 #define MAX_BANK_CONFLICT_ACCESS_TIME 580
@@ -307,27 +307,29 @@ void task2(char *buffer) {
   printf("banks: %d\n", conflicts.size());
   
   auto it = candidates.begin();
-  while(it != candidates.end()) {
-    int result = calc_fn(conflicts[0][0], *it);
-    bool same = true;
-    for(int j = 1; j < conflicts[0].size(); ++j) {
-      if(result != calc_fn(conflicts[0][j], *it)) {
-        same = false;
-        it = candidates.erase(it);
-        break;
+  for(int i = 0; i < conflicts.size(); ++i) {
+    while(it != candidates.end()) {
+      int result = calc_fn(conflicts[i][0], *it);
+      bool same = true;
+      for(int j = 1; j < conflicts[i].size(); ++j) {
+        if(result != calc_fn(conflicts[i][j], *it)) {
+          same = false;
+          it = candidates.erase(it);
+          break;
+        }
       }
-    }
-    if(same) {
-      ++it;
+      if(same) {
+        ++it;
+      }
     }
   }
 
   it = candidates.begin();
   while(it != candidates.end()) {
-    int result = calc_fn(conflicts[0][0], *it);
+    int result = calc_fn(conflicts[0][rand()%conflicts[0].size()], *it);
     bool same = true;
     for(int j = 1; j < conflicts.size(); ++j) {
-      if(result != calc_fn(conflicts[j][0], *it)) {
+      if(result != calc_fn(conflicts[j][rand()%conflicts[0].size()], *it)) {
         same = false;
         ++it;
         break;
