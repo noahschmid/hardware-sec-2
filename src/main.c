@@ -303,23 +303,39 @@ void task2(char *buffer) {
   std::vector<uint64_t> candidates = get_funcs();
   auto it = candidates.begin();
 
-  for(int i = 0; i < conflicts.size(); ++i) {
-    while(it != candidates.end()) {
-      int result = calc_fn(conflicts[i][0], *it);
-      int same = 1;
-      for(int j = 1; j < conflicts[i].size(); ++j) {
-        if(result != calc_fn(conflicts[i][j], *it)) {
-          same = 0;
-          it = candidates.erase(it);
-          break;
-        }
-      }
-      if(same) {
-        ++it;
+  
+  while(it != candidates.end()) {
+    int result = calc_fn(conflicts[0][0], *it);
+    int same = 1;
+    for(int j = 1; j < conflicts[0].size(); ++j) {
+      if(result != calc_fn(conflicts[0][j], *it)) {
+        same = 0;
+        it = candidates.erase(it);
+        break;
       }
     }
-    it = candidates.begin();
+    if(same) {
+      ++it;
+    }
   }
+    
+  it = candidates.begin();
+  
+  while(it != candidates.end()) {
+    int result = calc_fn(conflicts[0][rand()%conflicts[0].size()], *it);
+    int same = 1;
+    for(int j = 1; j < conflicts.size(); ++j) {
+      if(result != calc_fn(conflicts[j][rand()%conflicts[j].size()], *it)) {
+        same = 0;
+        ++it;
+        break;
+      }
+    }
+    if(same) {
+      it = candidates.erase(it);
+    }
+  }
+
 
   printf("candidates: %d\n", candidates.size());
 
