@@ -101,46 +101,6 @@ void update_center(point points[], const int num_values) {
     cluster_one.center = cluster_one.size > 0 ? cluster_one.center/cluster_one.size : -1;
 }
 
-int get_threshold(int values[], const int num_values) {
-    point *points = init_clusters(values, num_values);
-    assign_points(points, num_values);
-    update_center(points, num_values);
-    int change = 1;
-    int i = 0;
-
-    while(assign_points(points, num_values)) {
-        update_center(points, num_values);
-    }
-
-    printf("center 1: %d\n", cluster_one.center);
-    printf("center 2: %d\n", cluster_two.center);
-
-    int min = 10000;
-    int max = 0;
-
-    if(cluster_one.center < cluster_two.center) {
-        for(int i = 0; i < num_values; ++i) {
-            if(points[i].cluster == CLUSTER_ONE && points[i].value > max) 
-                max = points[i].value;
-
-            if(points[i].cluster == CLUSTER_TWO && points[i].value < min) 
-                min = points[i].value;
-        }
-        free(points);
-        return max + (int)((min-max)*0.8);
-    } else {
-        for(int i = 0; i < num_values; ++i) {
-            if(points[i].cluster == CLUSTER_TWO && points[i].value > max) 
-                max = points[i].value;
-
-            if(points[i].cluster == CLUSTER_ONE && points[i].value < min) 
-                min = points[i].value;
-        }
-        free(points);
-        return max + (int)((min-max)*0.8);
-    }
-}
-
 std::vector<uint64_t> gen_addrs(const int len, char *buffer) {
   std::vector<uint64_t> addrs;
 
@@ -202,6 +162,62 @@ void print_help() {
   printf("usage: \t./dram-functions -b \t-> prints the bits in hexadecimal to stdout\n");
   printf("\t./dram-functions -f \t-> prints the number and functions’ masks in hexadecimal\n");
   printf("\t./dram-functions -m\t-> prints the row mask in hexadecimal\n");
+}
+
+int get_threshold(char *buffer) {
+    int num_values = POOL_LEN;
+    int min = 10000;
+    int max = 0;
+    
+    std::vector<uint64_t> pool = gen_addrs(POOL_LEN, buffer);
+    uint64_t base = pool[rand()%POOL_LEN];
+    int times[POOL_LEN];
+    
+    for (int i = 0; i < POOL_LEN; ++i) {
+      times[i] = time_access((char*)base, (char*)pool[i]);
+      if(times[i] < min)
+        min = times[i];
+      if(times[i] > max && times[i] < 1000)
+        max = times[i];
+    }
+
+    point *points = init_clusters(times, num_values);
+    assign_points(points, num_values);
+    update_center(points, num_values);
+    int change = 1;
+    int i = 0;
+
+    while(assign_points(points, num_values)) {
+        update_center(points, num_values);
+    }
+
+    printf("center 1: %d\n", cluster_one.center);
+    printf("center 2: %d\n", cluster_two.center);
+
+    min = 10000;
+    max = 0;
+
+    if(cluster_one.center < cluster_two.center) {
+        for(int i = 0; i < num_values; ++i) {
+            if(points[i].cluster == CLUSTER_ONE && points[i].value > max) 
+                max = points[i].value;
+
+            if(points[i].cluster == CLUSTER_TWO && points[i].value < min) 
+                min = points[i].value;
+        }
+        free(points);
+        return max + (int)((min-max)*0.8);
+    } else {
+        for(int i = 0; i < num_values; ++i) {
+            if(points[i].cluster == CLUSTER_TWO && points[i].value > max) 
+                max = points[i].value;
+
+            if(points[i].cluster == CLUSTER_ONE && points[i].value < min) 
+                min = points[i].value;
+        }
+        free(points);
+        return max + (int)((min-max)*0.8);
+    }
 }
 
 int round_to_pow2(int num) {
@@ -308,13 +324,14 @@ std::vector<uint64_t> get_funcs() {
 }
 
 void task2(char *buffer) {
+  int threshold = get_threshold(buffer);
+  printf("threshold: %d\n", threshold);
   long long int significant_bits = 0;
   std::vector<uint64_t> candidates;
   bool ok = false;
   
-  
   while(!ok) {
-    std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, THRESHOLD);
+    std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, threshold);
     int num_banks = round_to_pow2(conflicts.size());
     candidates = get_funcs();
     auto it = candidates.begin();
