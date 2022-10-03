@@ -318,6 +318,7 @@ void task2(char *buffer) {
         ++it;
       }
     }
+    it = candidates.begin();
   }
 
   printf("candidates: %d\n", candidates.size());
