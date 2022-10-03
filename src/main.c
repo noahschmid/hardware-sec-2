@@ -302,45 +302,50 @@ std::vector<uint64_t> get_funcs() {
 void task2(char *buffer) {
   long long int significant_bits = 0;
   std::vector<std::vector<uint64_t>> conflicts = get_conflicts(buffer, THRESHOLD);
-  std::vector<uint64_t> candidates = get_funcs();
-
-  printf("banks: %d\n", conflicts.size());
   
-  auto it = candidates.begin();
-  for(int i = 0; i < conflicts.size(); ++i) {
+  bool ok = false;
+  int num_banks = round_to_pow2(conflicts.size());
+  
+  while(!ok) {
+    auto it = candidates.begin();
+    for(int i = 0; i < conflicts.size(); ++i) {
+      while(it != candidates.end()) {
+        int result = calc_fn(conflicts[i][0], *it);
+        bool same = true;
+        for(int j = 1; j < conflicts[i].size(); ++j) {
+          if(result != calc_fn(conflicts[i][j], *it)) {
+            same = false;
+            it = candidates.erase(it);
+            break;
+          }
+        }
+        if(same) {
+          ++it;
+        }
+      }
+    }
+
+    it = candidates.begin();
     while(it != candidates.end()) {
-      int result = calc_fn(conflicts[i][0], *it);
+      int result = calc_fn(conflicts[0][rand()%conflicts[0].size()], *it);
       bool same = true;
-      for(int j = 1; j < conflicts[i].size(); ++j) {
-        if(result != calc_fn(conflicts[i][j], *it)) {
+      for(int j = 1; j < conflicts.size(); ++j) {
+        if(result != calc_fn(conflicts[j][rand()%conflicts[0].size()], *it)) {
           same = false;
-          it = candidates.erase(it);
+          ++it;
           break;
         }
       }
       if(same) {
-        ++it;
+        it = candidates.erase(it);
       }
     }
-  }
 
-  it = candidates.begin();
-  while(it != candidates.end()) {
-    int result = calc_fn(conflicts[0][rand()%conflicts[0].size()], *it);
-    bool same = true;
-    for(int j = 1; j < conflicts.size(); ++j) {
-      if(result != calc_fn(conflicts[j][rand()%conflicts[0].size()], *it)) {
-        same = false;
-        ++it;
-        break;
-      }
-    }
-    if(same) {
-      it = candidates.erase(it);
-    }
+    if(num_banks == 16 && candidates.size() == 4)
+      ok = true;
+    if(num_banks == 32 && candidates.size() == 5)
+      ok = true;
   }
-
-  printf("candidates: %d\n", candidates.size());
 
   printf("%d\n", candidates.size());
 
