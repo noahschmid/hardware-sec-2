@@ -191,8 +191,8 @@ int get_threshold(char *buffer) {
         update_center(points, num_values);
     }
 
-    printf("center 1: %d\n", cluster_one.center);
-    printf("center 2: %d\n", cluster_two.center);
+    //printf("center 1: %d\n", cluster_one.center);
+    //printf("center 2: %d\n", cluster_two.center);
 
     min = 10000;
     max = 0;
@@ -267,7 +267,7 @@ std::vector<std::vector<uint64_t>> get_conflicts(char *buffer, int threshold) {
     }
   }*/
 
-  printf("num banks: %d\n", conflicts.size());
+  //printf("num banks: %d\n", conflicts.size());
   return conflicts;
 }
 
@@ -325,7 +325,7 @@ std::vector<uint64_t> get_funcs() {
 
 void task2(char *buffer) {
   int threshold = get_threshold(buffer);
-  printf("threshold: %d\n", threshold);
+  //printf("threshold: %d\n", threshold);
   long long int significant_bits = 0;
   std::vector<uint64_t> candidates;
   bool ok = false;
@@ -373,7 +373,7 @@ void task2(char *buffer) {
     if(num_banks == 32 && candidates.size() == 5)
       ok = true;
 
-    printf("num candidates: %d\n", candidates.size());
+    //printf("num candidates: %d\n", candidates.size());
   }
 
   printf("%d\n", candidates.size());
